@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <link rel="manifest" href="manifest.json" />
+  <title>JEE Chemistry Dashboard</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#111935;
+      --panel2:#0f1730;
+      --panel3:#162042;
+      --text:#e5ecff;
+      --muted:#9fb0df;
+      --line:#243055;
+      --accent:#7c8cff;
+      --accent2:#2ee6a6;
+      --warn:#ffcc66;
+      --danger:#ff7070;
+      --shadow: 0 18px 40px rgba(0,0,0,.28);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;height:100%;background:linear-gradient(180deg,#07101d 0%, #0b1020 35%, #08101a 100%);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+    button,input,select,textarea{font:inherit}
+    a{color:inherit}
+    .app{min-height:100%;display:flex;flex-direction:column}
+    .topbar{position:sticky;top:0;z-index:20;backdrop-filter: blur(14px);background:rgba(8,13,28,.82);border-bottom:1px solid rgba(255,255,255,.06)}
+    .topbar-inner{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:14px 16px;max-width:1500px;margin:0 auto}
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#5ce1ff);display:grid;place-items:center;box-shadow:var(--shadow);flex:none}
+    .logo svg{width:22px;height:22px;fill:#fff}
+    .brand h1{font-size:18px;margin:0;line-height:1.1}
+    .brand p{margin:2px 0 0;color:var(--muted);font-size:12px}
+    .top-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .btn{border:1px solid rgba(255,255,255,.09);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));color:var(--text);padding:10px 12px;border-radius:14px;cursor:pointer;transition:.18s ease;box-shadow:none}
+    .btn:hover{transform:translateY(-1px);border-color:rgba(124,140,255,.45)}
+    .btn.primary{background:linear-gradient(135deg,var(--accent),#5d7cff);border-color:transparent;color:white}
+    .btn.success{background:linear-gradient(135deg,#1dbf86,#2ee6a6);border-color:transparent;color:#06131a}
+    .btn.warn{background:linear-gradient(135deg,#ffcb62,#ff9f43);border-color:transparent;color:#241500}
+    .btn.ghost{background:transparent}
+
+    .notice{max-width:1500px;margin:14px auto 0;padding:0 16px}
+    .notice-box{border:1px solid rgba(124,140,255,.22);background:linear-gradient(135deg,rgba(124,140,255,.12),rgba(46,230,166,.08));padding:12px 14px;border-radius:16px;color:#dfe8ff;font-size:13px;line-height:1.45}
+
+    .shell{max-width:1500px;margin:0 auto;padding:16px;display:grid;grid-template-columns:320px 1fr 360px;gap:16px;flex:1;min-height:0}
+    .panel{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;min-height:0}
+    .panel-hd{padding:14px 14px 10px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .panel-hd h2,.panel-hd h3{margin:0;font-size:15px}
+    .panel-bd{padding:14px;overflow:auto;max-height:calc(100vh - 142px)}
+    .sidebar .panel-bd{display:flex;flex-direction:column;gap:14px}
+    .field{display:flex;flex-direction:column;gap:6px}
+    .field label{font-size:12px;color:var(--muted)}
+    .field input,.field select,.field textarea{width:100%;padding:11px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.09);background:rgba(9,14,28,.72);color:var(--text);outline:none}
+    .field textarea{resize:vertical;min-height:92px}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .stat{padding:12px;border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.06)}
+    .stat .k{font-size:12px;color:var(--muted)}
+    .stat .v{font-size:22px;font-weight:700;margin-top:4px}
+    .stat .s{font-size:12px;color:var(--muted);margin-top:2px}
+
+    .branch-tabs{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.03);color:var(--text);padding:8px 10px;border-radius:999px;font-size:12px;cursor:pointer}
+    .chip.active{background:linear-gradient(135deg,var(--accent),#5d7cff);border-color:transparent;color:white}
+
+    .chapters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .chapter-card{padding:14px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.07);cursor:pointer;transition:.18s ease}
+    .chapter-card:hover{transform:translateY(-2px);border-color:rgba(124,140,255,.38)}
+    .chapter-card.selected{outline:2px solid rgba(124,140,255,.55)}
+    .chapter-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .chapter-name{font-size:15px;font-weight:700;line-height:1.25}
+    .chapter-branch{font-size:11px;color:#d6dbff;padding:4px 8px;border-radius:999px;background:rgba(124,140,255,.15);border:1px solid rgba(124,140,255,.25);white-space:nowrap}
+    .chapter-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;color:var(--muted);font-size:12px}
+    .progress-wrap{margin-top:10px}
+    .progress-line{height:10px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:inherit;width:0%}
+    .progress-text{margin-top:6px;font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:10px}
+    .chapter-empty{padding:22px;border:1px dashed rgba(255,255,255,.16);border-radius:18px;color:var(--muted);text-align:center}
+
+    .detail-header{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+    .detail-title{font-size:22px;font-weight:800;margin:0}
+    .detail-sub{color:var(--muted);font-size:13px;margin-top:4px}
+    .bar-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-top:12px}
+    .section{margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06)}
+    .section h4{margin:0 0 10px;font-size:14px}
+    .subtopics{display:flex;flex-direction:column;gap:10px}
+    .subtopic{padding:12px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+    .subtopic-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .subtopic-title{font-weight:700;line-height:1.35}
+    .subtopic-desc{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.45}
+    .badge-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+    .badge{font-size:11px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);color:#dfe7ff}
+    .status{font-size:11px;padding:4px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.08)}
+    .status.todo{background:rgba(255,255,255,.04);color:#cdd6ff}
+    .status.lecture{background:rgba(124,140,255,.15);color:#dce3ff}
+    .status.practice{background:rgba(255,204,102,.15);color:#ffe3a4}
+    .status.revise{background:rgba(46,230,166,.15);color:#c9ffe9}
+    .status.mastered{background:rgba(46,230,166,.22);color:#aef8db}
+    .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .action-btn{padding:8px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.03);color:var(--text);cursor:pointer;font-size:12px}
+    .action-btn.active{background:linear-gradient(135deg,var(--accent),#5d7cff);border-color:transparent;color:white}
+    .action-btn.success{background:linear-gradient(135deg,#1dbf86,#2ee6a6);border-color:transparent;color:#06131a}
+    .action-btn.warn{background:linear-gradient(135deg,#ffcb62,#ff9f43);border-color:transparent;color:#241500}
+    .action-btn.danger{background:linear-gradient(135deg,#ff7a7a,#ff5d7d);border-color:transparent;color:white}
+
+    .mini-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .mini{padding:10px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+    .mini .k{font-size:11px;color:var(--muted)}
+    .mini .v{font-size:16px;font-weight:700;margin-top:3px}
+
+    .log-card,.planner-card{padding:12px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+    .log-card + .log-card,.planner-card + .planner-card{margin-top:10px}
+    .log-meta{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px;color:var(--muted);font-size:12px}
+    .list{display:flex;flex-direction:column;gap:8px}
+    .list-item{padding:10px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05)}
+    .list-item .t{font-weight:650}
+    .list-item .s{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4}
+
+    .footer-note{color:var(--muted);font-size:12px;line-height:1.5;padding:2px 2px 0}
+    .sticky-bottom{position:sticky;bottom:0;background:linear-gradient(180deg,rgba(8,16,25,0),rgba(8,16,25,.92) 18%, rgba(8,16,25,.98));padding-top:8px;margin-top:10px}
+    .small{font-size:12px;color:var(--muted)}
+
+    @media (max-width: 1200px){
+      .shell{grid-template-columns:1fr;}
+      .panel-bd{max-height:none}
+      .chapters{grid-template-columns:1fr}
+    }
+    @media (max-width: 720px){
+      .topbar-inner{align-items:flex-start;flex-direction:column}
+      .top-actions{justify-content:flex-start}
+      .mini-grid,.stats,.grid-2{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width: 520px){
+      .mini-grid,.stats,.grid-2{grid-template-columns:1fr}
+      .bar-row{grid-template-columns:1fr}
+      .top-actions .btn{flex:1}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 2l2.3 6.8H21l-5.5 4 2.1 6.8L12 15.7 6.4 19.6l2.1-6.8L3 8.8h6.7L12 2z"/></svg>
+        </div>
+        <div>
+          <h1>JEE Chemistry Dashboard</h1>
+          <p>Local-only tracker for chapters, subtopics, logs, practice, and revision rounds</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="btn success" id="installBtn" style="display:none">Install App</button>
+        <button class="btn primary" id="exportBtn">Export Backup</button>
+        <button class="btn" id="importBtn">Import Backup</button>
+        <button class="btn success" id="resetBtn">Reset Device Data</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="notice">
+    <div class="notice-box">
+      This app saves everything in your browser on this phone only using local storage. Open the app from a hosted HTTPS link to see the install option and add it to your home screen.
+    </div>
+  </div>
+
+  <div class="shell">
+    <aside class="panel sidebar">
+      <div class="panel-hd"><h2>Controls</h2><span class="small" id="dataScope">Local only</span></div>
+      <div class="panel-bd">
+        <div class="stats">
+          <div class="stat"><div class="k">Total chapters</div><div class="v" id="statChapters">31</div><div class="s">Physical + Inorganic + Organic</div></div>
+          <div class="stat"><div class="k">Subtopics</div><div class="v" id="statSubtopics">0</div><div class="s">Across all chapters</div></div>
+          <div class="stat"><div class="k">Completed</div><div class="v" id="statDone">0%</div><div class="s">Overall progress</div></div>
+          <div class="stat"><div class="k">Questions done</div><div class="v" id="statQDone">0</div><div class="s">From your target</div></div>
+        </div>
+
+        <div class="field">
+          <label for="search">Smart filter</label>
+          <input id="search" type="search" placeholder="Search chapter or subtopic" />
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="branchFilter">Branch</label>
+            <select id="branchFilter">
+              <option value="All">All</option>
+              <option value="Physical">Physical</option>
+              <option value="Inorganic">Inorganic</option>
+              <option value="Organic">Organic</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="statusFilter">Status</label>
+            <select id="statusFilter">
+              <option value="All">All</option>
+              <option value="Todo">Todo</option>
+              <option value="Lecture">Lecture</option>
+              <option value="Practice">Practice</option>
+              <option value="Revise">Revise</option>
+              <option value="Mastered">Mastered</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="targetQuestions">Total question target (12,000–20,000)</label>
+          <input id="targetQuestions" type="number" min="12000" max="20000" step="100" />
+        </div>
+        <div class="grid-2">
+          <button class="btn primary" id="autoDistributeBtn">Auto distribute</button>
+          <button class="btn" id="fillDemoBtn">Demo data</button>
+        </div>
+
+        <div class="section" style="margin-top:0;border-top:none;padding-top:0;">
+          <h4>Branch quick view</h4>
+          <div class="branch-tabs" id="branchTabs"></div>
+        </div>
+
+        <div class="section">
+          <h4>Today log</h4>
+          <div class="field">
+            <label for="logDone">What I did today</label>
+            <textarea id="logDone" placeholder="Lecture, practice, revision, tests..."></textarea>
+          </div>
+          <div class="field">
+            <label for="logTomorrow">What I will do tomorrow</label>
+            <textarea id="logTomorrow" placeholder="Planned chapters / subtopics..."></textarea>
+          </div>
+          <div class="field">
+            <label for="logMistakes">Mistakes / weak points</label>
+            <textarea id="logMistakes" placeholder="Formula mistakes, concepts, silly errors..."></textarea>
+          </div>
+          <button class="btn success" id="saveLogBtn">Save today log</button>
+        </div>
+
+        <div class="footer-note">
+          Question targets, progress, and logs stay on this device only unless you export a backup file.
+        </div>
+      </div>
+    </aside>
+
+    <main class="panel main">
+      <div class="panel-hd">
+        <h2>Chapters</h2>
+        <div class="small" id="chapterCountLabel"></div>
+      </div>
+      <div class="panel-bd">
+        <div class="chapters" id="chapterGrid"></div>
+        <div class="sticky-bottom">
+          <div class="section" id="detailArea">
+            <div class="chapter-empty">Select a chapter to manage its subtopics, lecture stage, practice count, revision rounds, and final practice.</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <aside class="panel">
+      <div class="panel-hd"><h2>Logs & revision</h2><span class="small">R1 → R2 → R3</span></div>
+      <div class="panel-bd">
+        <div class="planner-card">
+          <div class="log-meta"><span>Revision schedule</span><span id="revisionSummary">0 due</span></div>
+          <div class="mini-grid">
+            <div class="mini"><div class="k">R1 due</div><div class="v" id="dueR1">0</div></div>
+            <div class="mini"><div class="k">R2 due</div><div class="v" id="dueR2">0</div></div>
+            <div class="mini"><div class="k">R3 due</div><div class="v" id="dueR3">0</div></div>
+          </div>
+        </div>
+
+        <div class="planner-card">
+          <div class="log-meta"><span>Current log</span><span id="currentLogDate"></span></div>
+          <div class="list">
+            <div class="list-item"><div class="t">Today</div><div class="s" id="viewToday">No note yet.</div></div>
+            <div class="list-item"><div class="t">Tomorrow</div><div class="s" id="viewTomorrow">No note yet.</div></div>
+            <div class="list-item"><div class="t">Mistakes</div><div class="s" id="viewMistakes">No note yet.</div></div>
+          </div>
+        </div>
+
+        <div class="planner-card">
+          <div class="log-meta"><span>Chapters to revise soon</span><span id="dueCount">0</span></div>
+          <div class="list" id="dueList"></div>
+        </div>
+
+        <div class="planner-card">
+          <div class="log-meta"><span>How stages work</span><span>Lecture → Practice → R1 → R2 → R3 → Final</span></div>
+          <div class="small" style="line-height:1.6">
+            Mark lecture first, fill practice questions, then clear revision rounds. Final practice becomes available after all revision rounds are done.
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<input type="file" id="importFile" accept="application/json" hidden />
+
+<script>
+(function(){
+  const STORAGE_KEY = 'jeeChemDashboard_v1';
+  const todayISO = () => new Date().toISOString().slice(0,10);
+  const esc = s => String(s ?? '').replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+  const clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
+  const byId = id => document.getElementById(id);
+  const daysFrom = (iso, days) => {
+    const d = new Date(iso+'T00:00:00');
+    d.setDate(d.getDate()+days);
+    return d.toISOString().slice(0,10);
+  };
+  const fmtDate = iso => {
+    if(!iso) return '';
+    const d = new Date(iso+'T00:00:00');
+    return d.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'});
+  };
+  const stageIndex = st => ({todo:0,lecture:1,practice:2,r1:3,r2:4,r3:5,mastered:6}[st] ?? 0);
+  const stageLabel = st => ({todo:'Todo', lecture:'Lecture', practice:'Practice', r1:'R1', r2:'R2', r3:'R3', mastered:'Mastered'}[st] ?? 'Todo');
+  const dueDays = { r1:1, r2:3, r3:7 };
+
+  const chapters = [
+    {id:'phy-1', branch:'Physical', title:'Some Basic Concepts of Chemistry', subtopics:[
+      ['Mole concept','Mole, molar mass, molarity, normality, concentration terms'],
+      ['Stoichiometry','Balanced equations, limiting reagent, yield, empirical formula'],
+      ['Atomic mass & formulae','Average atomic mass, molecular formula calculations'],
+      ['Equivalent concept','Equivalents, n-factor, redox and acid-base applications']
+    ]},
+    {id:'phy-2', branch:'Physical', title:'Atomic Structure', subtopics:[
+      ['Discovery of subatomic particles','Electron, proton, neutron, gold foil experiment'],
+      ['Electromagnetic radiation','Wavelength, frequency, photon, Planck’s quantum theory'],
+      ['Spectrum and line spectra','Hydrogen spectrum, emission, absorption, spectral series'],
+      ['Bohr’s model','Postulates, radius, energy, spectral lines'],
+      ['Dual nature of matter','de Broglie hypothesis, matter waves'],
+      ['Uncertainty principle','Heisenberg uncertainty and its implications'],
+      ['Quantum mechanical model','Schrodinger equation, wave function, orbitals'],
+      ['Quantum numbers','n, l, m, s and their meaning'],
+      ['Orbitals and shapes','s, p, d, f orbitals, nodes, penetration'],
+      ['Electronic configuration','Aufbau, Pauli, Hund, exceptions'],
+      ['Standard model of atom','Modern view of atomic structure and electron distribution']
+    ]},
+    {id:'phy-3', branch:'Physical', title:'States of Matter', subtopics:[
+      ['Gas laws','Boyle, Charles, Avogadro, combined gas law'],
+      ['Kinetic molecular theory','Assumptions, real vs ideal gases'],
+      ['Graham’s law','Diffusion and effusion'],
+      ['Liquids and vapour pressure','Intermolecular forces, viscosity, surface tension'],
+      ['Critical state','Critical temperature, pressure, volume']
+    ]},
+    {id:'phy-4', branch:'Physical', title:'Thermodynamics', subtopics:[
+      ['System and surroundings','Types of systems, state functions'],
+      ['First law','Internal energy, heat, work, PV work'],
+      ['Enthalpy','Heat of reaction, formation, combustion'],
+      ['Entropy and spontaneity','Entropy, Gibbs free energy, equilibrium'],
+      ['Hess’s law','Enthalpy cycles and calculations']
+    ]},
+    {id:'phy-5', branch:'Physical', title:'Chemical Equilibrium', subtopics:[
+      ['Reversible reactions','Dynamic equilibrium, equilibrium constant'],
+      ['Kc and Kp','Relationship between Kc and Kp'],
+      ['Le Chatelier’s principle','Effect of concentration, pressure, temperature'],
+      ['Homogeneous and heterogeneous equilibria','Examples and applications']
+    ]},
+    {id:'phy-6', branch:'Physical', title:'Ionic Equilibrium', subtopics:[
+      ['Acids and bases','Arrhenius, Bronsted-Lowry, Lewis concepts'],
+      ['pH and pOH','Strong and weak electrolytes'],
+      ['Buffer solutions','Buffer action and Henderson equation'],
+      ['Solubility product','Ksp, common ion effect'],
+      ['Hydrolysis','Salt hydrolysis and pH of salts'],
+      ['Degree of ionization','Ka, Kb, dissociation constant']
+    ]},
+    {id:'phy-7', branch:'Physical', title:'Redox Reactions', subtopics:[
+      ['Oxidation number','Rules and calculations'],
+      ['Oxidation and reduction','Oxidizing and reducing agents'],
+      ['Balancing redox','Ion-electron method, oxidation number method'],
+      ['Disproportionation and comproportionation','Classic examples']
+    ]},
+    {id:'phy-8', branch:'Physical', title:'Electrochemistry', subtopics:[
+      ['Conductance','Specific, molar, equivalent conductance'],
+      ['Electrochemical cells','Galvanic and electrolytic cells'],
+      ['Nernst equation','Cell potential and concentration cells'],
+      ['Faraday laws','Electrolysis and charge calculations'],
+      ['Batteries and fuel cells','Primary, secondary, fuel cells'],
+      ['Corrosion','Rusting and protection methods']
+    ]},
+    {id:'phy-9', branch:'Physical', title:'Chemical Kinetics', subtopics:[
+      ['Rate of reaction','Average, instantaneous rate'],
+      ['Order and molecularity','Rate law and units'],
+      ['Integrated rate equations','Zero, first, second order'],
+      ['Half-life','Half-life relationships'],
+      ['Temperature dependence','Arrhenius equation, activation energy'],
+      ['Catalysis','Homogeneous, heterogeneous catalysis']
+    ]},
+    {id:'phy-10', branch:'Physical', title:'Solutions', subtopics:[
+      ['Types of solutions','Solid, liquid, gas solutions'],
+      ['Concentration terms','Mole fraction, molarity, molality'],
+      ['Raoult’s law','Vapour pressure lowering'],
+      ['Colligative properties','ΔTb, ΔTf, osmotic pressure'],
+      ['Abnormal molar mass','Van’t Hoff factor, association and dissociation']
+    ]},
+    {id:'phy-11', branch:'Physical', title:'Surface Chemistry', subtopics:[
+      ['Adsorption','Physisorption and chemisorption'],
+      ['Catalysis','Promoters and poisons'],
+      ['Colloids','Tyndall effect, types, coagulation'],
+      ['Emulsions','Micelles, cleansing action']
+    ]},
+    {id:'phy-12', branch:'Physical', title:'Solid State', subtopics:[
+      ['Crystal structure','Unit cells, cubic systems'],
+      ['Packing','Close packing, voids, coordination number'],
+      ['Defects','Stoichiometric and non-stoichiometric defects'],
+      ['Electrical properties','Conductors, semiconductors, insulators'],
+      ['Density of solids','Density formula and calculations']
+    ]},
+    {id:'in-13', branch:'Inorganic', title:'Periodic Table & Periodicity', subtopics:[
+      ['Modern periodic law','Arrangement of periods and groups'],
+      ['Atomic radius','Trends across periods and down groups'],
+      ['Ionization enthalpy','Factors affecting ionization'],
+      ['Electron gain enthalpy','Trends and exceptions'],
+      ['Electronegativity','Bonding implications']
+    ]},
+    {id:'in-14', branch:'Inorganic', title:'Chemical Bonding and Molecular Structure', subtopics:[
+      ['Lewis structures','Octet rule, formal charge'],
+      ['Ionic bond','Lattice energy and Born-Haber cycle'],
+      ['Covalent bond','Valence bond theory, hybridization'],
+      ['VSEPR theory','Shapes of molecules and ions'],
+      ['Molecular orbital theory','Bond order, paramagnetism'],
+      ['Hydrogen bonding','Intermolecular forces and anomalies'],
+      ['Dipole moment','Polarity and molecular geometry']
+    ]},
+    {id:'in-15', branch:'Inorganic', title:'Hydrogen', subtopics:[
+      ['Occurrence and isotopes','Protium, deuterium, tritium'],
+      ['Properties','Hydrides, oxidation states'],
+      ['Water','Structure, hardness, heavy water'],
+      ['Hydrogen peroxide','Preparation, properties, uses']
+    ]},
+    {id:'in-16', branch:'Inorganic', title:'s-Block Elements', subtopics:[
+      ['Group 1 elements','Alkali metals, trends, anomalies'],
+      ['Group 2 elements','Alkaline earth metals'],
+      ['Compounds of sodium and calcium','Na2CO3, NaOH, CaO, Ca(OH)2, CaCO3'],
+      ['Hardness and flame colors','Characteristic tests']
+    ]},
+    {id:'in-17', branch:'Inorganic', title:'p-Block Elements', subtopics:[
+      ['Group 13','Boron family and compounds'],
+      ['Group 14','Carbon family, catenation, allotropy'],
+      ['Group 15','Nitrogen family, oxides, oxoacids'],
+      ['Group 16','Oxygen family, sulfuric acid, ozone'],
+      ['Group 17','Halogens, interhalogens, oxoacids'],
+      ['Group 18','Noble gases and compounds']
+    ]},
+    {id:'in-18', branch:'Inorganic', title:'d- and f-Block Elements', subtopics:[
+      ['Transition elements','General properties and trends'],
+      ['Electronic configuration','Anomalies and oxidation states'],
+      ['Colour and magnetism','Variable oxidation states, complexes'],
+      ['Lanthanoids and actinoids','Contraction, oxidation states'],
+      ['Important compounds','Potassium dichromate, KMnO4']
+    ]},
+    {id:'in-19', branch:'Inorganic', title:'Coordination Compounds', subtopics:[
+      ['Nomenclature','Ligands, naming rules'],
+      ['Isomerism','Geometrical, optical, linkage, ionization'],
+      ['Valence bond theory','Hybridization and magnetic properties'],
+      ['Crystal field theory','Splitting, CFSE, high spin/low spin'],
+      ['Werner theory','Primary and secondary valency']
+    ]},
+    {id:'in-20', branch:'Inorganic', title:'Metallurgy', subtopics:[
+      ['Concentration of ore','Gravity, froth flotation, magnetic separation'],
+      ['Extraction steps','Calcination, roasting, reduction'],
+      ['Refining','Electrolytic refining, zone refining'],
+      ['Thermodynamics of extraction','Ellingham diagram basics']
+    ]},
+    {id:'in-21', branch:'Inorganic', title:'Environmental Chemistry', subtopics:[
+      ['Air pollution','Pollutants, smog, ozone depletion'],
+      ['Water pollution','BOD, COD, treatment'],
+      ['Green chemistry','Principles and examples'],
+      ['Soil and industrial pollution','CFCs, greenhouse gases']
+    ]},
+    {id:'in-22', branch:'Inorganic', title:'Qualitative Analysis / Salt Analysis', subtopics:[
+      ['Basic radicals','Cation group analysis'],
+      ['Acid radicals','Anion tests'],
+      ['Confirmatory tests','Flame, precipitation, complex formation'],
+      ['Interfering ions','Common-ion and special cases']
+    ]},
+    {id:'org-23', branch:'Organic', title:'Basic Principles of Organic Chemistry (GOC + Isomerism)', subtopics:[
+      ['IUPAC nomenclature','Naming rules and priorities'],
+      ['Electronic effects','Inductive, resonance, hyperconjugation'],
+      ['Reaction intermediates','Carbocation, carbanion, free radical'],
+      ['Acidity and basicity','Order of acidity/basicity'],
+      ['Isomerism','Structural and stereoisomerism'],
+      ['Purification and analysis','Distillation, crystallization, chromatography']
+    ]},
+    {id:'org-24', branch:'Organic', title:'Hydrocarbons', subtopics:[
+      ['Alkanes','Preparation, reactions, conformation'],
+      ['Alkenes','Addition reactions, Markovnikov, peroxide effect'],
+      ['Alkynes','Acidity, preparation, reactions'],
+      ['Aromatic hydrocarbons','Benzene, electrophilic substitution'],
+      ['Aromaticity','Hückel rule and resonance']
+    ]},
+    {id:'org-25', branch:'Organic', title:'Haloalkanes and Haloarenes', subtopics:[
+      ['Nucleophilic substitution','SN1, SN2, stereochemistry'],
+      ['Elimination reactions','E1, E2 basics'],
+      ['Preparation','From alcohols and alkanes'],
+      ['Haloarenes','Reactivity and directing effects']
+    ]},
+    {id:'org-26', branch:'Organic', title:'Alcohols, Phenols and Ethers', subtopics:[
+      ['Alcohols','Preparation, reactions, tests'],
+      ['Phenols','Acidity, Reimer-Tiemann, Kolbe'],
+      ['Ethers','Williamson synthesis, cleavage'],
+      ['Distinguishing tests','Lucas test, bromine water, ferric chloride']
+    ]},
+    {id:'org-27', branch:'Organic', title:'Aldehydes, Ketones and Carboxylic Acids', subtopics:[
+      ['Carbonyl chemistry','Nucleophilic addition'],
+      ['Aldehydes','Preparations, oxidation, tests'],
+      ['Ketones','Cannizzaro vs aldol basics'],
+      ['Carboxylic acids','Acidity, derivatives, reactions'],
+      ['Important named reactions','Aldol, Cannizzaro, HVZ']
+    ]},
+    {id:'org-28', branch:'Organic', title:'Amines', subtopics:[
+      ['Classification','1°, 2°, 3° amines'],
+      ['Basicity','Aliphatic vs aromatic amines'],
+      ['Preparation','Reduction, Gabriel, Hoffmann'],
+      ['Diazonium salts','Preparation, reactions, importance'],
+      ['Tests','Carbylamine, Hinsberg']
+    ]},
+    {id:'org-29', branch:'Organic', title:'Biomolecules', subtopics:[
+      ['Carbohydrates','Glucose, fructose, sucrose, starch'],
+      ['Proteins','Amino acids, peptide bond, structure'],
+      ['Vitamins','Fat soluble and water soluble'],
+      ['Nucleic acids','DNA and RNA basics'],
+      ['Enzymes','Action and specificity']
+    ]},
+    {id:'org-30', branch:'Organic', title:'Polymers', subtopics:[
+      ['Polymerization','Addition and condensation'],
+      ['Synthetic polymers','PVC, nylon, teflon, bakelite'],
+      ['Natural polymers','Rubber, cellulose, proteins'],
+      ['Biodegradable polymers','Examples and uses']
+    ]},
+    {id:'org-31', branch:'Organic', title:'Chemistry in Everyday Life', subtopics:[
+      ['Drugs','Analgesics, antibiotics, antacids'],
+      ['Detergents and soaps','Types and cleaning action'],
+      ['Food additives','Preservatives, artificial sweeteners'],
+      ['Antiseptics and disinfectants','Common examples']
+    ]}
+  ].map(ch => ({...ch, subtopics: ch.subtopics.map(([name,desc]) => ({name,desc}))}));
+
+  const branchColors = {Physical:'var(--accent)', Inorganic:'var(--warn)', Organic:'var(--accent2)'};
+  const stageOrder = ['todo','lecture','practice','r1','r2','r3','mastered'];
+
+  function defaultSubState(chapterId, idx, name){
+    return {
+      id:`${chapterId}::${idx}`,
+      lecture:false,
+      practiceDone:0,
+      practiceTarget:25,
+      r1:false,
+      r2:false,
+      r3:false,
+      finalPractice:false,
+      notes:'',
+      mistakes:'',
+      due:{r1:null,r2:null,r3:null},
+      updatedAt:null,
+      title:name
+    };
+  }
+
+  function createDefaultState(){
+    const state = {
+      selectedChapterId: chapters[1].id,
+      filterBranch:'All',
+      filterStatus:'All',
+      search:'',
+      totalQuestionTarget:15000,
+      logs:{[todayISO()]:{today:'', tomorrow:'', mistakes:''}},
+      chapters:{}
+    };
+    for(const ch of chapters){
+      state.chapters[ch.id] = {
+        totalQuestions: Math.round(15000 / 31),
+        subtopics: ch.subtopics.map((st,i)=>defaultSubState(ch.id,i,st.name))
+      };
+    }
+    state.chapters[chapters[1].id].subtopics[0].lecture = true;
+    state.chapters[chapters[1].id].subtopics[0].practiceDone = 5;
+    return state;
+  }
+
+  let state = loadState();
+  if(!state) state = createDefaultState();
+  state = normalizeState(state);
+
+  function normalizeState(s){
+    const base = createDefaultState();
+    const out = {...base, ...s};
+    out.logs = out.logs || {};
+    out.chapters = out.chapters || {};
+    for(const ch of chapters){
+      const existing = out.chapters[ch.id] || {};
+      const subs = ch.subtopics.map((st,i)=>{
+        const cur = (existing.subtopics && existing.subtopics[i]) || {};
+        const merged = {...defaultSubState(ch.id,i,st.name), ...cur, title:st.name};
+        merged.practiceTarget = clamp(Number(merged.practiceTarget || 25), 0, 2000);
+        merged.practiceDone = clamp(Number(merged.practiceDone || 0), 0, merged.practiceTarget || 2000);
+        if(!merged.due) merged.due = {r1:null,r2:null,r3:null};
+        return merged;
+      });
+      out.chapters[ch.id] = {
+        totalQuestions: Number(existing.totalQuestions || Math.round((out.totalQuestionTarget || 15000)/31)),
+        subtopics: subs
+      };
+    }
+    out.totalQuestionTarget = clamp(Number(out.totalQuestionTarget || 15000), 12000, 20000);
+    if(!out.selectedChapterId || !chapters.some(c=>c.id===out.selectedChapterId)) out.selectedChapterId = chapters[1].id;
+    out.filterBranch = out.filterBranch || 'All';
+    out.filterStatus = out.filterStatus || 'All';
+    out.search = out.search || '';
+    if(!out.logs[todayISO()]) out.logs[todayISO()] = {today:'', tomorrow:'', mistakes:''};
+    return out;
+  }
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    }catch(e){
+      return null;
+    }
+  }
+  function saveState(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    syncLogFields();
+  }
+
+  function getSub(chId, idx){ return state.chapters[chId].subtopics[idx]; }
+  function getChapter(chId){ return chapters.find(c => c.id === chId); }
+
+  function subStatus(sub){
+    if(sub.r3 && sub.finalPractice) return 'mastered';
+    if(sub.r3) return 'revise';
+    if(sub.r2) return 'revise';
+    if(sub.r1) return 'revise';
+    if(sub.practiceDone > 0) return 'practice';
+    if(sub.lecture) return 'lecture';
+    return 'todo';
+  }
+
+  function chapterProgress(chId){
+    const subs = state.chapters[chId].subtopics;
+    const done = subs.reduce((a,s)=>a + (subStatus(s)==='mastered' ? 1 : 0), 0);
+    const progress = Math.round((done / subs.length) * 100);
+    const lectures = subs.filter(s=>s.lecture).length;
+    const practicePercent = subs.length ? Math.round(subs.reduce((a,s)=>a + Math.min(100, Math.round((s.practiceDone / Math.max(1,s.practiceTarget))*100)),0)/subs.length) : 0;
+    const dueCount = subs.filter(s => ['r1','r2','r3'].some(k => s.due[k] && s.due[k] <= todayISO())).length;
+    return {progress, lectures, practicePercent, dueCount, totalSubs:subs.length};
+  }
+
+  function overallStats(){
+    const flat = chapters.flatMap(ch => state.chapters[ch.id].subtopics);
+    const total = flat.length;
+    const mastered = flat.filter(s=>subStatus(s)==='mastered').length;
+    const qDone = flat.reduce((a,s)=>a+s.practiceDone,0);
+    const qTarget = state.totalQuestionTarget;
+    const due = flat.filter(s => ['r1','r2','r3'].some(k => s.due[k] && s.due[k] <= todayISO())).length;
+    return {total, mastered, qDone, qTarget, due};
+  }
+
+  function branchCount(branch){
+    return chapters.filter(c=>c.branch===branch).length;
+  }
+
+  function autoDistribute(){
+    const totalSubs = chapters.reduce((a,c)=>a+c.subtopics.length,0);
+    const target = clamp(state.totalQuestionTarget, 12000, 20000);
+    let assigned = 0;
+    const chunks = [];
+    for(const ch of chapters){
+      const chapterWeight = ch.subtopics.length / totalSubs;
+      const chapterTarget = Math.max(ch.subtopics.length * 8, Math.round(target * chapterWeight));
+      chunks.push({id:ch.id, target:chapterTarget});
+      assigned += chapterTarget;
+    }
+    let diff = target - assigned;
+    let i = 0;
+    while(diff !== 0 && chunks.length){
+      const idx = i % chunks.length;
+      const change = diff > 0 ? 1 : -1;
+      chunks[idx].target = Math.max(chunks[idx].target + change, chapters.find(c=>c.id===chunks[idx].id).subtopics.length * 5);
+      diff -= change;
+      i++;
+    }
+    for(const c of chunks){ state.chapters[c.id].totalQuestions = c.target; }
+    saveState(); renderAll();
+  }
+
+  function setStage(sub, stage){
+    if(stage === 'lecture'){ sub.lecture = true; }
+    if(stage === 'practice'){ sub.practiceDone = Math.max(sub.practiceDone, sub.practiceTarget); }
+    if(stage === 'r1'){ if(!sub.lecture) sub.lecture = true; if(sub.practiceDone < sub.practiceTarget) sub.practiceDone = sub.practiceTarget; sub.r1 = true; sub.due.r1 = daysFrom(todayISO(), dueDays.r1); }
+    if(stage === 'r2'){ sub.r1 = true; sub.r2 = true; sub.due.r2 = daysFrom(todayISO(), dueDays.r2); }
+    if(stage === 'r3'){ sub.r2 = true; sub.r3 = true; sub.due.r3 = daysFrom(todayISO(), dueDays.r3); }
+    if(stage === 'mastered'){ sub.lecture = true; sub.practiceDone = sub.practiceTarget; sub.r1 = sub.r2 = sub.r3 = true; sub.finalPractice = true; }
+    sub.updatedAt = new Date().toISOString();
+  }
+
+  function stageFromSub(sub){
+    if(sub.r3 && sub.finalPractice) return 'mastered';
+    if(sub.r3) return 'r3';
+    if(sub.r2) return 'r2';
+    if(sub.r1) return 'r1';
+    if(sub.practiceDone >= sub.practiceTarget && sub.lecture) return 'practice';
+    if(sub.lecture) return 'lecture';
+    return 'todo';
+  }
+
+  function renderBranchTabs(){
+    const wrap = byId('branchTabs');
+    const tabs = [
+      ['All', chapters.length],
+      ['Physical', branchCount('Physical')],
+      ['Inorganic', branchCount('Inorganic')],
+      ['Organic', branchCount('Organic')]
+    ];
+    wrap.innerHTML = tabs.map(([name,count]) => `<button class="chip ${state.filterBranch===name?'active':''}" data-branch="${name}">${name} (${count})</button>`).join('');
+    wrap.querySelectorAll('button').forEach(btn => btn.addEventListener('click',()=>{
+      state.filterBranch = btn.dataset.branch;
+      byId('branchFilter').value = state.filterBranch;
+      saveState(); renderAll();
+    }));
+  }
+
+  function matchesFilter(ch, status){
+    const branchOK = state.filterBranch === 'All' || ch.branch === state.filterBranch;
+    const q = state.search.trim().toLowerCase();
+    const nameMatch = !q || ch.title.toLowerCase().includes(q) || ch.subtopics.some(s => s.name.toLowerCase().includes(q) || s.desc.toLowerCase().includes(q));
+    const chapterStatus = (()=>{
+      const subs = state.chapters[ch.id].subtopics;
+      const scores = subs.map(subStatus);
+      if(scores.every(s=>s==='mastered')) return 'Mastered';
+      if(scores.some(s=>s==='r3')) return 'Revise';
+      if(scores.some(s=>s==='practice')) return 'Practice';
+      if(scores.some(s=>s==='lecture')) return 'Lecture';
+      return 'Todo';
+    })();
+    const statusOK = state.filterStatus==='All' || chapterStatus===state.filterStatus;
+    return branchOK && nameMatch && statusOK;
+  }
+
+  function renderChapterGrid(){
+    const grid = byId('chapterGrid');
+    const filtered = chapters.filter(ch => matchesFilter(ch));
+    byId('chapterCountLabel').textContent = `${filtered.length} shown`;
+    if(!filtered.length){
+      grid.innerHTML = `<div class="chapter-empty" style="grid-column:1/-1">No chapter matches your filter.</div>`;
+      return;
+    }
+    grid.innerHTML = filtered.map(ch => {
+      const p = chapterProgress(ch.id);
+      return `<div class="chapter-card ${state.selectedChapterId===ch.id?'selected':''}" data-ch="${ch.id}">
+        <div class="chapter-top">
+          <div class="chapter-name">${esc(ch.title)}</div>
+          <div class="chapter-branch" style="background:${branchColorStyle(ch.branch)}">${ch.branch}</div>
+        </div>
+        <div class="chapter-meta">
+          <span>${p.totalSubs} subtopics</span>
+          <span>${p.lectures} lectures</span>
+          <span>${p.dueCount} due</span>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-line"><div class="progress-fill" style="width:${p.progress}%"></div></div>
+          <div class="progress-text"><span>${p.progress}% mastered</span><span>${p.practicePercent}% practice</span></div>
+        </div>
+      </div>`;
+    }).join('');
+    grid.querySelectorAll('.chapter-card').forEach(card => card.addEventListener('click',()=>{
+      state.selectedChapterId = card.dataset.ch;
+      saveState(); renderAll();
+    }));
+  }
+
+  function branchColorStyle(branch){
+    return branch==='Physical' ? 'rgba(124,140,255,.18)' : branch==='Inorganic' ? 'rgba(255,204,102,.18)' : 'rgba(46,230,166,.16)';
+  }
+
+  function renderDetail(){
+    const ch = getChapter(state.selectedChapterId);
+    const data = state.chapters[ch.id];
+    const p = chapterProgress(ch.id);
+    const wrap = byId('detailArea');
+    wrap.innerHTML = `
+      <div class="detail-header">
+        <div>
+          <h3 class="detail-title">${esc(ch.title)}</h3>
+          <div class="detail-sub">${ch.branch} · ${ch.subtopics.length} subtopics · ${p.dueCount} due for revision</div>
+        </div>
+        <div class="stats" style="min-width:260px;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
+          <div class="stat"><div class="k">Mastered</div><div class="v">${p.progress}%</div><div class="s">Chapter progress</div></div>
+          <div class="stat"><div class="k">Practice</div><div class="v">${p.practicePercent}%</div><div class="s">Target coverage</div></div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="progress-line"><div class="progress-fill" style="width:${p.progress}%"></div></div>
+        <div class="small">Questions allocated: <b>${data.totalQuestions}</b></div>
+      </div>
+      <div class="section">
+        <h4>Subtopics</h4>
+        <div class="subtopics" id="subtopicList"></div>
+      </div>
+    `;
+    const list = wrap.querySelector('#subtopicList');
+    list.innerHTML = ch.subtopics.map((st, i) => renderSubtopic(ch, data.subtopics[i], i)).join('');
+    list.querySelectorAll('[data-act]').forEach(el => el.addEventListener('click', onSubAction));
+    list.querySelectorAll('[data-practice]').forEach(inp => inp.addEventListener('change', onPracticeChange));
+    list.querySelectorAll('[data-note]').forEach(ta => ta.addEventListener('input', onNoteInput));
+  }
+
+  function renderSubtopic(ch, sub, idx){
+    const st = stageFromSub(sub);
+    const status = stageLabel(st);
+    const dueInfo = [sub.due.r1 && `R1: ${fmtDate(sub.due.r1)}`, sub.due.r2 && `R2: ${fmtDate(sub.due.r2)}`, sub.due.r3 && `R3: ${fmtDate(sub.due.r3)}`].filter(Boolean).join(' · ');
+    const practicePct = Math.min(100, Math.round((sub.practiceDone / Math.max(1, sub.practiceTarget)) * 100));
+    const dueColor = sub.due.r1 && sub.due.r1 <= todayISO() ? 'style="color:#ffe3a4"' : '';
+    return `
+      <div class="subtopic" data-subwrap="${ch.id}:${idx}">
+        <div class="subtopic-head">
+          <div>
+            <div class="subtopic-title">${idx+1}. ${esc(sub.title)}</div>
+            <div class="subtopic-desc">${esc(ch.subtopics[idx].desc)}</div>
+          </div>
+          <div class="status ${st}">${status}</div>
+        </div>
+        <div class="badge-row">
+          <span class="badge">Practice: ${sub.practiceDone}/${sub.practiceTarget}</span>
+          <span class="badge" ${dueColor}>${dueInfo || 'Revision not scheduled'}</span>
+          <span class="badge">Final: ${sub.finalPractice ? 'Done' : 'Pending'}</span>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-line"><div class="progress-fill" style="width:${practicePct}%"></div></div>
+          <div class="progress-text"><span>Practice progress</span><span>${practicePct}%</span></div>
+        </div>
+        <div class="actions">
+          <button class="action-btn ${sub.lecture?'active':''}" data-act="lecture" data-ch="${ch.id}" data-idx="${idx}">Lecture</button>
+          <button class="action-btn ${sub.practiceDone >= sub.practiceTarget?'active':''}" data-act="practice" data-ch="${ch.id}" data-idx="${idx}">Practice done</button>
+          <button class="action-btn ${sub.r1?'active':''}" data-act="r1" data-ch="${ch.id}" data-idx="${idx}">R1</button>
+          <button class="action-btn ${sub.r2?'active':''}" data-act="r2" data-ch="${ch.id}" data-idx="${idx}">R2</button>
+          <button class="action-btn ${sub.r3?'active':''}" data-act="r3" data-ch="${ch.id}" data-idx="${idx}">R3</button>
+          <button class="action-btn ${sub.finalPractice?'success':''}" data-act="mastered" data-ch="${ch.id}" data-idx="${idx}">Final practice</button>
+        </div>
+        <div class="grid-2" style="margin-top:10px;">
+          <div class="field">
+            <label>Practice target</label>
+            <input type="number" min="0" max="2000" data-practice="target" data-ch="${ch.id}" data-idx="${idx}" value="${sub.practiceTarget}" />
+          </div>
+          <div class="field">
+            <label>Practice done</label>
+            <input type="number" min="0" max="2000" data-practice="done" data-ch="${ch.id}" data-idx="${idx}" value="${sub.practiceDone}" />
+          </div>
+        </div>
+        <div class="grid-2" style="margin-top:10px;">
+          <div class="field">
+            <label>Notes</label>
+            <textarea data-note="notes" data-ch="${ch.id}" data-idx="${idx}" placeholder="Key points to remember">${esc(sub.notes)}</textarea>
+          </div>
+          <div class="field">
+            <label>Mistakes</label>
+            <textarea data-note="mistakes" data-ch="${ch.id}" data-idx="${idx}" placeholder="Mistakes made in this subtopic">${esc(sub.mistakes)}</textarea>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function onSubAction(e){
+    const act = e.currentTarget.dataset.act;
+    const chId = e.currentTarget.dataset.ch;
+    const idx = Number(e.currentTarget.dataset.idx);
+    const sub = getSub(chId, idx);
+    if(act==='lecture'){ sub.lecture = !sub.lecture; if(sub.lecture && sub.due.r1 === null) sub.due.r1 = daysFrom(todayISO(), dueDays.r1); }
+    if(act==='practice'){ sub.practiceDone = Math.max(sub.practiceDone, sub.practiceTarget); if(sub.lecture && !sub.r1) sub.due.r1 = daysFrom(todayISO(), dueDays.r1); }
+    if(act==='r1'){ setStage(sub,'r1'); }
+    if(act==='r2'){ setStage(sub,'r2'); }
+    if(act==='r3'){ setStage(sub,'r3'); }
+    if(act==='mastered'){ setStage(sub,'mastered'); }
+    sub.updatedAt = new Date().toISOString();
+    saveState(); renderAll();
+  }
+
+  function onPracticeChange(e){
+    const chId = e.currentTarget.dataset.ch;
+    const idx = Number(e.currentTarget.dataset.idx);
+    const which = e.currentTarget.dataset.practice;
+    const sub = getSub(chId, idx);
+    const val = clamp(Number(e.currentTarget.value || 0), 0, 2000);
+    if(which==='target') sub.practiceTarget = val;
+    if(which==='done') sub.practiceDone = clamp(val, 0, Math.max(sub.practiceTarget, val));
+    if(sub.practiceDone >= sub.practiceTarget && sub.lecture && !sub.r1) sub.due.r1 = daysFrom(todayISO(), dueDays.r1);
+    sub.updatedAt = new Date().toISOString();
+    saveState(); renderAll();
+  }
+
+  function onNoteInput(e){
+    const chId = e.currentTarget.dataset.ch;
+    const idx = Number(e.currentTarget.dataset.idx);
+    const which = e.currentTarget.dataset.note;
+    const sub = getSub(chId, idx);
+    sub[which] = e.currentTarget.value;
+    sub.updatedAt = new Date().toISOString();
+    saveState(); renderSidebarOnly();
+  }
+
+  function renderLogs(){
+    const log = state.logs[todayISO()] || {today:'', tomorrow:'', mistakes:''};
+    byId('currentLogDate').textContent = fmtDate(todayISO());
+    byId('viewToday').textContent = log.today || 'No note yet.';
+    byId('viewTomorrow').textContent = log.tomorrow || 'No note yet.';
+    byId('viewMistakes').textContent = log.mistakes || 'No note yet.';
+    byId('logDone').value = log.today || '';
+    byId('logTomorrow').value = log.tomorrow || '';
+    byId('logMistakes').value = log.mistakes || '';
+  }
+
+  function renderDue(){
+    const flat = chapters.flatMap(ch => state.chapters[ch.id].subtopics.map((s,idx)=>({ch, sub:s, idx}))); 
+    const today = todayISO();
+    const due = flat.filter(x => ['r1','r2','r3'].some(k => x.sub.due[k] && x.sub.due[k] <= today));
+    byId('dueCount').textContent = due.length;
+    byId('revisionSummary').textContent = `${due.length} due`;
+    byId('dueR1').textContent = flat.filter(x => x.sub.due.r1 && x.sub.due.r1 <= today).length;
+    byId('dueR2').textContent = flat.filter(x => x.sub.due.r2 && x.sub.due.r2 <= today).length;
+    byId('dueR3').textContent = flat.filter(x => x.sub.due.r3 && x.sub.due.r3 <= today).length;
+    const list = byId('dueList');
+    if(!due.length){
+      list.innerHTML = `<div class="list-item"><div class="t">Nothing due right now</div><div class="s">Mark lecture, practice, and revision rounds to start reminders.</div></div>`;
+      return;
+    }
+    list.innerHTML = due.slice(0,8).map(x => `
+      <div class="list-item">
+        <div class="t">${esc(x.ch.title)}</div>
+        <div class="s">${esc(x.sub.title)} · ${x.sub.due.r1 && x.sub.due.r1 <= today ? 'R1' : x.sub.due.r2 && x.sub.due.r2 <= today ? 'R2' : 'R3'} due</div>
+      </div>
+    `).join('');
+  }
+
+  function renderSidebarOnly(){
+    const stats = overallStats();
+    byId('statChapters').textContent = chapters.length;
+    byId('statSubtopics').textContent = stats.total;
+    byId('statDone').textContent = Math.round((stats.mastered / stats.total) * 100) + '%';
+    byId('statQDone').textContent = stats.qDone;
+    byId('targetQuestions').value = state.totalQuestionTarget;
+    byId('search').value = state.search;
+    byId('branchFilter').value = state.filterBranch;
+    byId('statusFilter').value = state.filterStatus;
+    renderBranchTabs();
+    renderDue();
+    renderLogs();
+  }
+
+  function renderAll(){
+    renderSidebarOnly();
+    renderChapterGrid();
+    renderDetail();
+  }
+
+  function syncLogFields(){
+    const log = state.logs[todayISO()] || {today:'', tomorrow:'', mistakes:''};
+    byId('logDone').value = log.today || '';
+    byId('logTomorrow').value = log.tomorrow || '';
+    byId('logMistakes').value = log.mistakes || '';
+  }
+
+  function setLog(){
+    state.logs[todayISO()] = {
+      today: byId('logDone').value.trim(),
+      tomorrow: byId('logTomorrow').value.trim(),
+      mistakes: byId('logMistakes').value.trim()
+    };
+    saveState();
+    renderAll();
+  }
+
+  function fillDemo(){
+    const ch = state.chapters['phy-2'];
+    ch.subtopics[0].lecture = true;
+    ch.subtopics[0].practiceDone = 18;
+    ch.subtopics[0].practiceTarget = 20;
+    ch.subtopics[0].due.r1 = daysFrom(todayISO(), -1);
+    ch.subtopics[1].lecture = true;
+    ch.subtopics[1].practiceDone = 25;
+    ch.subtopics[1].practiceTarget = 25;
+    ch.subtopics[1].r1 = true;
+    ch.subtopics[1].due.r2 = daysFrom(todayISO(), -1);
+    ch.subtopics[2].lecture = true;
+    ch.subtopics[2].practiceDone = 20;
+    ch.subtopics[2].practiceTarget = 30;
+    state.logs[todayISO()] = {
+      today:'Atomic structure lecture completed. Started practice on orbitals and quantum numbers.',
+      tomorrow:'Finish spectrum numericals and do R1 for Bohr model.',
+      mistakes:'Confused l vs m quantum numbers in one question.'
+    };
+    saveState(); renderAll();
+  }
+
+  function exportBackup(){
+    const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `jee-chemistry-backup-${todayISO()}.json`;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(url), 1500);
+  }
+
+  function importBackupClick(){ byId('importFile').click(); }
+  function handleImport(ev){
+    const file = ev.target.files && ev.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const imported = JSON.parse(reader.result);
+        state = normalizeState(imported);
+        saveState(); renderAll();
+      }catch(err){
+        alert('Backup file could not be read.');
+      }
+    };
+    reader.readAsText(file);
+    ev.target.value = '';
+  }
+
+  function resetDevice(){
+    if(confirm('Erase all dashboard data stored on this phone/browser?')){
+      localStorage.removeItem(STORAGE_KEY);
+      state = createDefaultState();
+      saveState(); renderAll();
+    }
+  }
+
+  // Event bindings
+  byId('search').addEventListener('input', e => { state.search = e.target.value; saveState(); renderAll(); });
+  byId('branchFilter').addEventListener('change', e => { state.filterBranch = e.target.value; saveState(); renderAll(); });
+  byId('statusFilter').addEventListener('change', e => { state.filterStatus = e.target.value; saveState(); renderAll(); });
+  byId('targetQuestions').addEventListener('change', e => {
+    state.totalQuestionTarget = clamp(Number(e.target.value || 15000), 12000, 20000);
+    saveState(); renderAll();
+  });
+  byId('autoDistributeBtn').addEventListener('click', autoDistribute);
+  byId('fillDemoBtn').addEventListener('click', fillDemo);
+  byId('saveLogBtn').addEventListener('click', setLog);
+  byId('exportBtn').addEventListener('click', exportBackup);
+  byId('importBtn').addEventListener('click', importBackupClick);
+  byId('importFile').addEventListener('change', handleImport);
+  byId('resetBtn').addEventListener('click', resetDevice);
+
+  // A soft auto-save for log fields
+  ['logDone','logTomorrow','logMistakes'].forEach(id => {
+    byId(id).addEventListener('input', ()=>{
+      state.logs[todayISO()] = {
+        today: byId('logDone').value,
+        tomorrow: byId('logTomorrow').value,
+        mistakes: byId('logMistakes').value
+      };
+      saveState();
+      renderLogs();
+    });
+  });
+
+  // Initialize
+  renderAll();
+
+  // Small prompt showing how to use revision stages
+  setTimeout(()=>{
+    const total = overallStats();
+    if(total.mastered === 0 && !state.logs[todayISO()].today){
+      byId('viewToday').textContent = 'Tip: mark Lecture, then set Practice target and complete practice to unlock revision rounds.';
+    }
+  }, 200);
+})();
+</script>
+
+<script>
+(function(){
+  let deferredPrompt = null;
+  const installBtn = document.getElementById('installBtn');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (installBtn) installBtn.style.display = 'inline-flex';
+  });
+
+  if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installBtn.style.display = 'none';
+    });
+  }
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
